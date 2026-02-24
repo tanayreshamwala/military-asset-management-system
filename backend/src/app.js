@@ -10,40 +10,14 @@ import dashboardRoutes from "./routes/dashboard.js";
 import auditRoutes from "./routes/audit.js";
 
 const app = express();
-const isDevelopment = process.env.NODE_ENV !== "production";
-
-const configuredOrigins = (
-  process.env.FRONTEND_URLS ||
-  process.env.FRONTEND_URL ||
-  ""
-)
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-
-if (isDevelopment) {
-  configuredOrigins.push("http://localhost:5173");
-}
-
-const allowedOrigins = [...new Set(configuredOrigins)];
+const allowedOrigin = process.env.FRONTEND_URL || "http://localhost:5173";
 
 // Middleware
 app.set("trust proxy", 1);
 app.use(helmet());
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow non-browser clients like curl/postman with no Origin header.
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error("CORS origin not allowed"));
-    },
+    origin: allowedOrigin,
     credentials: true,
   }),
 );
